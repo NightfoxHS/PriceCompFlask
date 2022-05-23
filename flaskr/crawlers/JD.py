@@ -20,7 +20,7 @@ class JD:
             r.encoding=r.apparent_encoding
 
             if r.status_code==200:
-                html = bs(open('res.html',encoding='utf-8'),'html.parser')
+                html = bs(r.text,'html.parser')
                 itemsList = html.find(id='J_goodsList')
                 itemsIdList = itemsList.find_all('li')
                 itemsPriceList = itemsList.find_all('i',attrs={'data-price':True})
