@@ -5,21 +5,21 @@ class JD:
     def __init__(self,searchKeyword,searchNum):
         self.searchKeyword = searchKeyword
         self.searchNum = searchNum
-        self.res = []
 
     def getItems(self):
+        res=[]
         nowPage = 0
         nowItemNum = 0
         startUrl = 'https://search.jd.com/Search?keyword='+ self.searchKeyword +'&enc=utf-8&wq='+ self.searchKeyword
         head = {'user-agent':'Mozilla/5.0'}
-        while nowItemNum < self.searchNum:
-            nowPage = nowPage + 1
-            nowUrl = startUrl +'&page=' + str(nowPage)
-            r = requests.get(nowUrl,headers=head,timeout=50)
-            r.raise_for_status()
-            r.encoding=r.apparent_encoding
+        try:
+            while nowItemNum < self.searchNum:
+                nowPage = nowPage + 1
+                nowUrl = startUrl +'&page=' + str(nowPage)
+                r = requests.get(nowUrl,headers=head,timeout=50)
+                r.raise_for_status()
+                r.encoding=r.apparent_encoding
 
-            if r.status_code==200:
                 html = bs(r.text,'html.parser')
                 itemsList = html.find(id='J_goodsList')
                 itemsIdList = itemsList.find_all('li')
@@ -34,16 +34,18 @@ class JD:
                         item['link'] = itemsNameList[i].a['href']
                         item['origin'] = 'JD'
                         nowItemNum = nowItemNum + 1
-                        self.res.append(item)
-            else:
-                return self.res 
-        return self.res
+                        res.append(item)
+        except(requests.HTTPError):
+            print("HTTPError Occurs")
+        except:
+            print("Unknown Error")
+        return res
 
             
 
     
 
 if __name__=='__main__':
-    crawler = JD('Iphone XS',10)
+    crawler = JD('MX375',10)
     res = crawler.getItems()
     print(res)
