@@ -1,6 +1,5 @@
 import traceback
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+import requests
 from bs4 import BeautifulSoup as bs
 
 class JD:
@@ -13,25 +12,14 @@ class JD:
         nowPage = 0
         nowItemNum = 0
         startUrl = 'https://search.jd.com/Search?keyword='+ self.searchKeyword +'&enc=utf-8&wq='+ self.searchKeyword
+        head = {'User-Agent': 'Mozilla/5.0 (Windows; U; MSIE 9.0; Windows NT 9.0; en-US)'}
         try:
-            chrom_options = Options()
-            chrom_options.add_argument('--headless')
-            chrom_options.add_argument('--disable-gpu')
-            prefs = {'profile.managed_default_content_settings.images': 2}
-            chrom_options.add_experimental_option('prefs',prefs)
-            driver = webdriver.Chrome(options=chrom_options)
-            script = '''
-                    Object.defineProperty(navigator, 'webdriver', {
-                    get: () => undefined
-                    })
-            ''' # 规避反爬
-            driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {"source": script})
-        
             while nowItemNum < self.searchNum:
                 nowPage = nowPage + 1
                 nowUrl = startUrl +'&page=' + str(nowPage)
-                driver.get(nowUrl)
-                html = bs(driver.page_source,'html.parser')
+                r = requests.get(nowUrl,headers=head)
+                r.raise_for_status()
+                html = bs(r.content,'html.parser')
                 itemsList = html.find(id='J_goodsList')
                 itemsList = itemsList.find_all('li')
                 if itemsList==None:
@@ -50,10 +38,8 @@ class JD:
                         item['origin'] = 'JD'
                         nowItemNum = nowItemNum + 1
                         res.append(item)
-            driver.quit()
         except:
             print(traceback.format_exc())
-            driver.quit()
         return res
 
             
