@@ -25,6 +25,9 @@ class JD:
                 itemsIdList = itemsList.find_all('li')
                 itemsPriceList = itemsList.find_all('i',attrs={'data-price':True})
                 itemsNameList = itemsList.find_all(class_='p-name')
+                itemsStoreList = itemsList.find_all(class_='p-shop')
+                if itemsList==None:
+                    return res
                 for i in range(len(itemsList)):
                     if nowItemNum < self.searchNum:
                         item = {}
@@ -32,6 +35,7 @@ class JD:
                         item['name'] = itemsNameList[i].a.em.get_text()
                         item['price'] = float(itemsPriceList[i].string)
                         item['link'] = itemsNameList[i].a['href']
+                        item['store'] = itemsStoreList[i].span.a.get_text()
                         item['origin'] = 'JD'
                         nowItemNum = nowItemNum + 1
                         res.append(item)
