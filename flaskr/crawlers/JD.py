@@ -1,4 +1,6 @@
-import requests
+import traceback
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup as bs
 
 class JD:
@@ -11,38 +13,47 @@ class JD:
         nowPage = 0
         nowItemNum = 0
         startUrl = 'https://search.jd.com/Search?keyword='+ self.searchKeyword +'&enc=utf-8&wq='+ self.searchKeyword
-        head = {'user-agent':'Mozilla/5.0'}
         try:
+            chrom_options = Options()
+            chrom_options.add_argument('--headless')
+            chrom_options.add_argument('--disable-gpu')
+            prefs = {'profile.managed_default_content_settings.images': 2}
+            chrom_options.add_experimental_option('prefs',prefs)
+            driver = webdriver.Chrome(options=chrom_options)
+            script = '''
+                    Object.defineProperty(navigator, 'webdriver', {
+                    get: () => undefined
+                    })
+            ''' # 规避反爬
+            driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {"source": script})
+        
             while nowItemNum < self.searchNum:
                 nowPage = nowPage + 1
                 nowUrl = startUrl +'&page=' + str(nowPage)
-                r = requests.get(nowUrl,headers=head,timeout=50)
-                r.raise_for_status()
-                r.encoding=r.apparent_encoding
-
-                html = bs(r.text,'html.parser')
+                driver.get(nowUrl)
+                html = bs(driver.page_source,'html.parser')
                 itemsList = html.find(id='J_goodsList')
-                itemsIdList = itemsList.find_all('li')
-                itemsPriceList = itemsList.find_all('i',attrs={'data-price':True})
-                itemsNameList = itemsList.find_all(class_='p-name')
-                itemsStoreList = itemsList.find_all(class_='p-shop')
+                itemsList = itemsList.find_all('li')
                 if itemsList==None:
                     return res
-                for i in range(len(itemsList)):
+                for i in itemsList:
                     if nowItemNum < self.searchNum:
                         item = {}
-                        item['id'] = 'J'+itemsIdList[i]['data-sku']
-                        item['name'] = itemsNameList[i].a.em.get_text()
-                        item['price'] = float(itemsPriceList[i].string)
-                        item['link'] = itemsNameList[i].a['href']
-                        item['store'] = itemsStoreList[i].span.a.get_text()
+                        item['id'] = 'J'+i['data-sku']
+                        item['name'] = i.find(class_='p-name').a.em.get_text()
+                        item['price'] = i.find(attrs={'data-price':True}).string
+                        item['img'] = i.find(class_='p-img').a.img['data-lazy-img']
+                        item['comments'] = i.find(class_='p-commit').strong.a.get_text()
+                        item['sales'] = 'N/A'
+                        item['link'] = i.find(class_='p-name').a['href']
+                        item['store'] = i.find(class_='p-shop').span.a.get_text()
                         item['origin'] = 'JD'
                         nowItemNum = nowItemNum + 1
                         res.append(item)
-        except(requests.HTTPError):
-            print("HTTPError Occurs")
+            driver.quit()
         except:
-            print("Unknown Error")
+            print(traceback.format_exc())
+            driver.quit()
         return res
 
             
