@@ -1,4 +1,5 @@
 import traceback
+from typing import List
 import requests
 from bs4 import BeautifulSoup as bs
 
@@ -7,7 +8,7 @@ class JD:
         self.searchKeyword = searchKeyword
         self.searchNum = searchNum
 
-    def getItems(self):
+    def getItems(self) -> List:
         res=[]
         nowPage = 0
         nowItemNum = 0

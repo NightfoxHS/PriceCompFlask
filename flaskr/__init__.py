@@ -7,7 +7,7 @@ from flask_httpauth import HTTPTokenAuth
 
 
 db = SQLAlchemy()
-api = Api()
+_api = Api(prefix='/api')
 auth = HTTPTokenAuth()
 
 
@@ -35,8 +35,14 @@ def create_app(test_config=None):
         pass
 
     db.init_app(app)
-    api.init_app(app)
+    
 
     from flaskr.root import root
     app.register_blueprint(root)
+
+    from flaskr.api import ItemAPI
+    _api.add_resource(ItemAPI,'/items',endpoint='items')
+
+    _api.init_app(app)
+
     return app

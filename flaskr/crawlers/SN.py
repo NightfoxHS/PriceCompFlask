@@ -1,4 +1,5 @@
 import traceback
+from typing import List
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup as bs
@@ -8,7 +9,7 @@ class SN:
         self.searchKeyword = searchKeyword
         self.serchNum = searchNum
 
-    def getItems(self):
+    def getItems(self) -> List:
         res = []
         nowPage = 0
         nowItemNum = 0
