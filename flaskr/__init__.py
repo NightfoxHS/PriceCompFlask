@@ -2,8 +2,13 @@ import os
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_restful import Api
+from flask_httpauth import HTTPTokenAuth
+
 
 db = SQLAlchemy()
+api = Api()
+auth = HTTPTokenAuth()
 
 
 def create_app(test_config=None):
@@ -30,6 +35,7 @@ def create_app(test_config=None):
         pass
 
     db.init_app(app)
+    api.init_app(app)
 
     from flaskr.root import root
     app.register_blueprint(root)
