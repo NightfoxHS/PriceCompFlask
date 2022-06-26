@@ -6,10 +6,6 @@ from flask import current_app
 
 
 def getToken(username, hashpassword):
-    '''
-        生成并返回token
-        token中包括私钥、用户名、哈希密码
-    '''
     s = URLSafeSerializer('secret_key', current_app.config['SECRET_KEY'])
 
     userInfo = {'username': username, 'password': hashpassword}
@@ -19,10 +15,6 @@ def getToken(username, hashpassword):
 
 @auth.verify_token
 def verify_token(token):
-    '''
-        验证token
-    '''
-    print(token)
     s = URLSafeSerializer('secret_key', current_app.config['SECRET_KEY'])
 
     try:
@@ -34,5 +26,5 @@ def verify_token(token):
     targetUser = User.query.filter_by(username=username).first()
     if targetUser:
         if hashpassword == targetUser.password:
-            return True     # 验证成功
+            return targetUser    # 验证成功
     return False    # 验证失败：用户信息错误

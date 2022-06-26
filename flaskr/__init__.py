@@ -35,13 +35,34 @@ def create_app(test_config=None):
         pass
 
     db.init_app(app)
-    
 
+    
+    '''db.app = app
+    db.drop_all()
+    db.create_all() # '''
+    
     from flaskr.root import root
     app.register_blueprint(root)
 
     from flaskr.api import ItemAPI
     _api.add_resource(ItemAPI,'/items',endpoint='items')
+
+    # 用户api
+    from flaskr.api import UserRegister, UserLogin, UserUpdate, UserCancel, UserSearch, UserLogout
+    _api.add_resource(UserRegister,'/users/register')
+    _api.add_resource(UserLogin,'/users/login')
+    _api.add_resource(UserUpdate,'/users/update')
+    _api.add_resource(UserCancel,'/users/cancel')
+    _api.add_resource(UserSearch,'/users/search')
+    _api.add_resource(UserLogout,'/users/logout')
+
+    # 管理员api
+    from flaskr.api import AdminSearchOneById, AdminDeleteOneById, AdminUpdateOne, AdminSearchAll, AdminDeleteAll
+    _api.add_resource(AdminSearchOneById,'/admin/search/one')
+    _api.add_resource(AdminDeleteOneById,'/admin/delete/one')
+    _api.add_resource(AdminUpdateOne,'/admin/update/one')
+    _api.add_resource(AdminSearchAll,'/admin/search/all')
+    _api.add_resource(AdminDeleteAll,'/admin/delete/all')
 
     _api.init_app(app)
 
