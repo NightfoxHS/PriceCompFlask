@@ -32,6 +32,7 @@ class SN:
             while nowItemNum < self.serchNum:
                 nowPage = nowPage + 1
                 if nowPage > 1:
+                    print(driver.find_element_by_id('nextPage'))
                     driver.find_element_by_id('nextPage').click()
                 html = bs(driver.page_source,'html.parser')
                 itemsList = html.find_all('li',attrs={'doctype':'1'})
@@ -44,10 +45,16 @@ class SN:
                         item['name'] = i.find(class_='title-selling-point').a.get_text()
                         item['price'] = str(i.find(class_='def-price').get_text()).replace('¥','')
                         item['img'] = i.find(class_='img-block').a.img['src']
-                        item['comments'] = str(i.find(class_='info-evaluate').a.get_text()).replace('评价','')
+                        try:
+                            item['comments'] = str(i.find(class_='info-evaluate').a.get_text()).replace('评价','')
+                        except:
+                            item['comments'] = 'Unknown'
                         item['sales'] = 'N/A'
                         item['link'] = i.find(class_='title-selling-point').a['href']
-                        item['store'] = i.find(class_='store-name').get_text()
+                        try:
+                            item['store'] = i.find(class_='store-name').get_text()
+                        except:
+                            item['store'] = 'Unknown'
                         item['origin'] = 'SN'
                         nowItemNum = nowItemNum+1
                         res.append(item)
@@ -59,6 +66,6 @@ class SN:
 
 
 if __name__=='__main__':
-    crawler = SN('MX375',2)
+    crawler = SN('洗衣机',10)
     res = crawler.getItems()
     print(res)
